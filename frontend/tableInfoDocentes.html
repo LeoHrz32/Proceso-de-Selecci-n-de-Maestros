@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Docentes</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <link rel="stylesheet" href="static/css/styleDocente.css" />
+
+  <style>
+    /* ---------- Modal de Notas ---------- */
+    .modal-note {
+      display: none;
+      /* Oculto por defecto */
+      position: fixed;
+      z-index: 1100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Clase para activar el modal y centrar su contenido */
+    .modal-note.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-note-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: noteSlideIn 0.3s;
+      position: relative;
+    }
+
+    .modal-note-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      color: #aaa;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .modal-note-close:hover {
+      color: #000;
+    }
+
+    /* ---------- Estilos del Formulario del Modal de Notas ---------- */
+    #noteForm {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #noteForm label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    /* Estilos para los textarea de los formularios */
+    #noteForm textarea,
+    #updateNoteForm textarea {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s ease;
+      overflow-y: hidden;
+      /* Se ajusta automáticamente hasta cierto límite */
+      max-height: 300px;
+      /* Límite máximo de altura */
+      resize: none;
+      /* Evita el redimensionamiento manual */
+    }
+
+    #noteForm textarea:focus,
+    #updateNoteForm textarea:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    #noteForm select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s ease;
+    }
+
+    #noteForm select:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+
+    #noteForm button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    #noteForm button:hover {
+      background-color: #0056b3;
+    }
+
+    /* ---------- Animaciones ---------- */
+    @keyframes noteSlideIn {
+      from {
+        transform: translateY(-50px);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .action-btn {
+      height: 40px;
+      /* Fija la altura deseada */
+      min-width: 40px;
+      /* Opcional, para que tengan un ancho mínimo consistente */
+      display: inline-flex;
+      /* Para centrar el contenido */
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+      /* Ajusta el padding según necesites */
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  </style>
+  <style>
+    /* ---------- Modal de Actualización de Nota ---------- */
+    .modal-update-note {
+      display: none;
+      /* Oculto por defecto */
+      position: fixed;
+      z-index: 1200;
+      /* Un z-index distinto para evitar conflictos */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.6);
+      /* Fondo semitransparente */
+    }
+
+    /* Clase para activar el modal y centrar su contenido */
+    .modal-update-note.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-update-note-content {
+      background-color: #f9f9f9;
+      /* Fondo ligeramente distinto */
+      padding: 25px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+      animation: updateNoteSlideIn 0.3s;
+      position: relative;
+    }
+
+    .modal-update-note-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      color: #888;
+      font-size: 26px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .modal-update-note-close:hover {
+      color: #444;
+    }
+
+    /* ---------- Estilos del Formulario del Modal de Actualización ---------- */
+    #updateNoteForm {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #updateNoteForm label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    #updateNoteForm input,
+    #updateNoteForm select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #bbb;
+      border-radius: 5px;
+      transition: border-color 0.3s;
+    }
+
+    #updateNoteForm input:focus,
+    #updateNoteForm select:focus {
+      border-color: #0056b3;
+      outline: none;
+    }
+
+    #updateNoteForm button {
+      background-color: #0056b3;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+      width: 100%;
+    }
+
+    #updateNoteForm button:hover {
+      background-color: #003d80;
+    }
+
+    /* ---------- Animación ---------- */
+    @keyframes updateNoteSlideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Ejemplo simple para el indicador de carga */
+    .loading-spinner {
+      font-style: italic;
+      color: #555;
+    }
+
+    #logout-btn {
+      background-color: #ff0000;
+      color: white;
+      padding: 10px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: block;
+      margin: 30px 0;
+      text-align: center;
+      float: right;
+    }
+  </style>
+
+
+</head>
+
+<body>
+  <div class="main-content">
+    <h1>Lista de Docentes</h1>
+
+    <!-- Barra de búsqueda justo encima de la tabla -->
+    <div class="search-bar">
+      <input type="text" id="search-input" class="search-input" placeholder="Buscar docente..." />
+      <button class="search-btn" id="search-btn">Buscar</button>
+    </div>
+
+    <!-- Select para escoger la columna a filtrar -->
+    <select id="filterField" onchange="updateFilterValues()">
+      <option value="">Seleccione una columna</option>
+      <option value="lugar_residencia">Lugar de residencia</option>
+      <option value="nivel_formacion">Nivel de formación</option>
+      <option value="areas_especializacion">Áreas de especialización</option>
+      <option value="disponibilidad_lunes">Disponibilidad Lunes</option>
+      <option value="disponibilidad_martes">Disponibilidad Martes</option>
+      <option value="disponibilidad_miercoles">
+        Disponibilidad Miércoles
+      </option>
+      <option value="disponibilidad_jueves">Disponibilidad Jueves</option>
+      <option value="disponibilidad_viernes">Disponibilidad Viernes</option>
+
+      <option value="disponibilidad_sabado">Disponibilidad Sábado</option>
+      <option value="disponibilidad_viajar">
+        Disponibilidad para viajar
+      </option>
+      <option value="equipo_conexion_estable">
+        Equipo con conexión estable
+      </option>
+      <option value="restriccion_contractual">Restricción contractual</option>
+    </select>
+
+    <!-- Select para escoger el valor, que se llenará dinámicamente -->
+    <select id="filterValue" disabled>
+      <option value="">Seleccione un valor</option>
+    </select>
+
+    <button onclick="filterTeachers()">Filtrar</button>
+
+    <!-- Contenedor para mostrar los resultados -->
+    <div id="results"></div>
+
+    <!-- Tabla de Docentes -->
+    <table id="docentes-table">
+      <thead>
+        <tr>
+          <th>Número de documento</th>
+          <th>Nombre docente</th>
+          <th>Nivel de formación</th>
+          <th style="text-align: center;">Notas asignadas</th>
+          <th>Acciones</th>
+          <th>Valoración</th>
+
+        </tr>
+      </thead>
+      <tbody>
+        <!-- rows-placeholder -->
+      </tbody>
+    </table>
+
+    <!-- Paginación -->
+    <div class="paginator-container">
+      <button id="prev-page" class="page-btn">Anterior</button>
+      <span id="page-info"></span>
+
+      <button id="next-page" class="page-btn">Siguiente</button>
+      <div class="container">
+        <button id="logout-btn">Cerrar Sesión</button>
+      </div>
+
+    </div>
+
+    <!-- Sección de carga de archivos debajo del paginador -->
+    <div class="file-upload">
+      <form id="excel-upload-form" enctype="multipart/form-data">
+        <label for="file">Selecciona un archivo Excel (.xlsx, .xls):</label>
+
+        <input type="file" id="file" name="file" accept=".xlsx, .xls" required />
+        <button type="submit">Subir</button>
+
+
+
+
+      </form>
+      <!-- Mensaje de éxito o error -->
+      <div id="message" style="margin-top: 10px"></div>
+    </div>
+
+
+    <!-- Modal de detalle del docente con pestañas -->
+    <div class="modal fade" id="teacherDetailModal" tabindex="-1" aria-labelledby="teacherDetailModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="teacherDetailModalLabel">Detalle del Docente</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+              aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Navegación por pestañas -->
+            <ul class="nav nav-tabs" id="teacherTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic"
+                  type="button" role="tab" aria-controls="basic" aria-selected="true">Datos Básicos</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button"
+                  role="tab" aria-controls="contact" aria-selected="false">Contacto</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="education-tab" data-bs-toggle="tab" data-bs-target="#education"
+                  type="button" role="tab" aria-controls="education" aria-selected="false">Formación</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="availability-tab" data-bs-toggle="tab" data-bs-target="#availability"
+                  type="button" role="tab" aria-controls="availability" aria-selected="false">Disponibilidad</button>
+              </li>
+              <!-- Nueva pestaña para Calificación -->
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rating-tab" data-bs-toggle="tab" data-bs-target="#rating" type="button"
+                  role="tab" aria-controls="rating" aria-selected="false">Calificación</button>
+              </li>
+            </ul>
+            <div class="tab-content mt-3" id="teacherTabContent">
+              <div class="tab-pane fade show active" id="basic" role="tabpanel" aria-labelledby="basic-tab">
+                <!-- Contenido de Datos Básicos -->
+              </div>
+              <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                <!-- Contenido de Contacto -->
+              </div>
+              <div class="tab-pane fade" id="education" role="tabpanel" aria-labelledby="education-tab">
+                <!-- Contenido de Formación -->
+              </div>
+              <div class="tab-pane fade" id="availability" role="tabpanel" aria-labelledby="availability-tab">
+                <!-- Contenido de Disponibilidad -->
+              </div>
+              <div class="tab-pane fade" id="rating" role="tabpanel" aria-labelledby="rating-tab">
+                <!-- Aquí se inyectará la información de la calificación -->
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal para Asignar Nota -->
+    <div id="noteModal" class="modal-note">
+      <div class="modal-note-content">
+        <span class="modal-note-close" onclick="closeNoteModal()">&times;</span>
+        <h2>Asignar Nota</h2>
+        <form id="noteForm">
+          <label for="noteSelect">Selecciona una nota:</label>
+          <select id="noteSelect" name="nota" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <label for="str_Evi">Comentario De evaluación Interna:</label>
+          <textarea id="str_Evi" name="str_Evi" required placeholder="Ingrese el comentario."></textarea>
+          <label for="str_ClienteExterno">Comentario de evaluación Externa:</label>
+          <textarea id="str_ClienteExterno" name="str_ClienteExterno" required
+            placeholder="Ingrese el comentario."></textarea>
+          <button type="submit">Guardar Nota</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal para Actualizar Nota -->
+    <div id="updateNoteModal" class="modal-update-note">
+      <div class="modal-update-note-content">
+        <span class="modal-update-note-close" onclick="closeUpdateNoteModal()">&times;</span>
+        <h2>Actualizar Nota</h2>
+        <form id="updateNoteForm">
+          <label for="updateNoteSelect">Selecciona una nueva nota:</label>
+          <select id="updateNoteSelect" name="nota" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <label for="update_str_Evi">Comentario de Evaluación Interna:</label>
+          <textarea id="update_str_Evi" name="str_Evi" required placeholder="Ingrese el comentario."></textarea>
+          <label for="update_str_ClienteExterno">Comentario de Evaluación Externa:</label>
+          <textarea id="update_str_ClienteExterno" name="str_ClienteExterno" required
+            placeholder="Ingrese el comentario."></textarea>
+          <button type="submit">Guardar Cambios</button>
+        </form>
+      </div>
+    </div>
+
+
+
+    <script>
+      let currentPage = 1;
+      let totalPages = 1;
+      const docentesPerPage = 5;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        renderDocentes(currentPage);
+        document
+          .getElementById("search-input")
+          .addEventListener("input", searchDocentes);
+        document
+          .getElementById("prev-page")
+          .addEventListener("click", () => changePage(-1));
+        document
+          .getElementById("next-page")
+          .addEventListener("click", () => changePage(1));
+      });
+
+      async function fetchDocentes(page = 1) {
+        try {
+          const response = await fetch(
+            `http://localhost:8000/docentes_paginated?page=${page}&per_page=${docentesPerPage}`
+          );
+          if (!response.ok) throw new Error("Error al obtener los datos.");
+          const data = await response.json();
+          totalPages = data.total_pages;
+          return data.docentes;
+        } catch (error) {
+          console.error("Error al obtener los datos:", error);
+          document.querySelector("#docentes-table tbody").innerHTML = `
+      <tr><td colspan="5" style="text-align:center; color:red;">Error cargando docentes</td></tr>`;
+          return [];
+        }
+      }
+
+      // Función que convierte el promedio decimal en una representación de estrellas
+      function getStarRating(ratingDecimal) {
+        // Convertir el valor a número (puede venir como string o number)
+        const rating = parseFloat(ratingDecimal);
+
+        // Calcular las estrellas llenas, media estrella y vacías
+        const fullStars = Math.floor(rating);
+        const halfStars = (rating - fullStars) >= 0.5 ? 1 : 0;
+        const emptyStars = 5 - fullStars - halfStars;
+
+        // Íconos de FontAwesome:
+        // 'fas fa-star' para estrella llena,
+        // 'fas fa-star-half-alt' para media estrella,
+        // 'far fa-star' para estrella vacía.
+        let starsHTML = "";
+        for (let i = 0; i < fullStars; i++) {
+          starsHTML += '<i class="fas fa-star"></i>';
+        }
+        if (halfStars) {
+          starsHTML += '<i class="fas fa-star-half-alt"></i>';
+        }
+        for (let i = 0; i < emptyStars; i++) {
+          starsHTML += '<i class="far fa-star"></i>';
+        }
+        return starsHTML;
+      }
+
+      // Función que renderiza los docentes en la tabla, mostrando el promedio como estrellas
+      async function renderDocentes(page) {
+        const docentes = await fetchDocentes(page);
+        const tbody = document.querySelector("#docentes-table tbody");
+        tbody.innerHTML = "";
+
+        docentes.forEach((docente) => {
+          // Validar el promedio; si no está definido, asignar "0.00"
+          const promedio = (docente.promedio !== undefined && docente.promedio !== null)
+            ? docente.promedio
+            : "0.00";
+          // Convertir el promedio a una representación visual de estrellas
+          const starRating = getStarRating(promedio);
+
+          // Mostrar la nota del usuario o "No calificado" si no tiene calificación
+          const userNota = docente.user_nota ? docente.user_nota : "No calificado";
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+      <td>${docente.identificacion}</td>
+      <td>${docente.nombre_completo}</td>
+      <td>${docente.nivel_formacion}</td>
+      <td class="text-center">${userNota}</td>
+      <td class="action-cell">
+          <button class="action-btn view-btn" onclick="viewDocente('${docente.identificacion}')">
+              <i class="fas fa-eye"></i>
+          </button>
+          <button class="action-btn add-note-btn" onclick="openNoteModal('${docente.identificacion}')">
+              <i class="fas fa-plus"></i> Agregar Nota
+          </button>
+           <button class="action-btn edit-note-btn" onclick="openUpdateNoteModal('${docente.identificacion}')">
+            <i class="fas fa-edit"></i> Editar Nota
+          </button>
+ 
+          <button class="action-btn delete-btn" onclick="deleteDocente('${docente.identificacion}')">
+              <i class="fas fa-trash"></i> 
+          </button>
+      </td>
+      <td class="text-center">${starRating}</td>
+    `;
+          tbody.appendChild(row);
+        });
+
+        document.getElementById("page-info").textContent = `Página ${currentPage} de ${totalPages}`;
+        document.getElementById("prev-page").disabled = currentPage === 1;
+        document.getElementById("next-page").disabled = currentPage === totalPages;
+      }
+
+
+
+
+      function changePage(direction) {
+        if (
+          (direction === -1 && currentPage > 1) ||
+          (direction === 1 && currentPage < totalPages)
+        ) {
+          currentPage += direction;
+          document.getElementById("search-input").value = "";
+          renderDocentes(currentPage);
+        }
+      }
+      // Función para salir con el botón
+      document.getElementById("logout-btn").onclick = async function () {
+        const response = await fetch("/logout", { method: "POST" });
+        if (response.ok) {
+          window.location.href = "/";
+        }
+      };
+
+
+      async function searchDocentes() {
+        const query = document.getElementById("search-input").value.toLowerCase();
+
+        // Si el input está vacío, se renderiza la paginación normal
+        if (query.trim() === "") {
+          return renderDocentes(currentPage);
+        }
+
+        try {
+          const response = await fetch(
+            `http://localhost:8000/docentes_search?query=${encodeURIComponent(query)}`
+          );
+          if (!response.ok) throw new Error("Error al buscar docentes.");
+          const data = await response.json();
+
+          const tbody = document.querySelector("#docentes-table tbody");
+          tbody.innerHTML = ""; // Limpiar tabla antes de agregar resultados
+
+          data.docentes.forEach((docente) => {
+            const row = document.createElement("tr");
+
+            // Convertir el promedio a estrellas
+            const starRating = getStarRating(docente.promedio);
+
+            // Para este ejemplo, se asume que "userNota" no se incluye en esta búsqueda,
+            // así que puedes omitirlo o mostrar otro valor.
+            const userNota = "No calificado"; // O si el endpoint retorna esta propiedad, úsala.
+
+            // Generar la fila
+            row.innerHTML = `
+        <td>${docente.identificacion}</td>
+        <td>${docente.nombre_completo}</td>
+        <td>${docente.nivel_formacion}</td>
+        <td class="text-center">${userNota}</td>
+        <td class="action-cell">
+            <button class="action-btn view-btn" onclick="viewDocente('${docente.identificacion}')">
+                <i class="fas fa-eye"></i>
+            </button>
+            <button class="action-btn add-note-btn" onclick="openNoteModal('${docente.identificacion}')">
+                <i class="fas fa-plus"></i> Agregar Nota
+            </button>
+            <button class="action-btn edit-note-btn" onclick="openUpdateNoteModal('${docente.identificacion}')">
+            <i class="fas fa-edit"></i> Editar Nota
+          </button>
+ 
+          <button class="action-btn delete-btn" onclick="deleteDocente('${docente.identificacion}')">
+              <i class="fas fa-trash"></i> 
+          </button>
+        </td>
+        <td class="text-center">${starRating}</td>
+      `;
+            tbody.appendChild(row);
+          });
+
+          // Indicar que se muestran resultados de búsqueda y deshabilitar la paginación
+          document.getElementById("page-info").textContent = "Resultados de búsqueda";
+          document.getElementById("prev-page").disabled = true;
+          document.getElementById("next-page").disabled = true;
+        } catch (error) {
+          console.error("Error al buscar docentes:", error);
+        }
+      }
+
+
+      // Vincula el evento submit al formulario
+      document
+        .getElementById("excel-upload-form")
+        .addEventListener("submit", handleFileUpload);
+
+      // Función principal para manejar la carga del archivo
+      async function handleFileUpload(event) {
+        console.log("Evento submit capturado.");
+        event.preventDefault(); // Evita recargar la página
+
+        const messageElement = document.getElementById("message");
+        messageElement.innerHTML = ""; // Limpia mensajes previos
+
+        const fileInput = document.getElementById("file");
+        const file = fileInput.files[0];
+
+        console.log("Archivo seleccionado:", file);
+
+        // Validar si se seleccionó un archivo
+        if (!file) {
+          showMessage("Por favor, selecciona un archivo Excel.", "red");
+          return;
+        }
+
+        // Validar que el archivo sea Excel
+        if (!isValidExcelFile(file)) {
+          showMessage("El archivo debe ser un archivo Excel (.xlsx o .xls).", "red");
+          return;
+        }
+
+        // Crear objeto FormData y agregar el archivo
+        const formData = new FormData();
+        formData.append("file", file);
+
+        console.log("FormData preparado para enviar:", formData);
+
+        // Mostrar indicador de carga
+        const loadingIndicator = createLoadingIndicator();
+        messageElement.appendChild(loadingIndicator);
+
+        try {
+          // Enviar archivo al backend
+          const response = await uploadFile(formData);
+
+          // Eliminar indicador de carga
+          loadingIndicator.remove();
+
+          // Manejar la respuesta del backend
+          handleServerResponse(response);
+        } catch (error) {
+          console.error("Error en la solicitud:", error);
+          showMessage("Error al intentar cargar el archivo. Intenta nuevamente.", "red");
+        }
+      }
+
+      // Función para validar si el archivo es un Excel
+      function isValidExcelFile(file) {
+        // Lista de MIME types permitidos
+        const allowedTypes = [
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "application/vnd.ms-excel"
+        ];
+        console.log("Tipo MIME del archivo:", file.type);
+        return allowedTypes.includes(file.type);
+      }
+
+      // Función para enviar el archivo al backend
+      async function uploadFile(formData) {
+        console.log("Enviando solicitud al backend...");
+        const response = await fetch("/uploadfile/", {
+          method: "POST",
+          body: formData
+        });
+        console.log("Respuesta del servidor:", response);
+        return response.json(); // Se espera una respuesta en JSON
+      }
+
+      // Función para manejar la respuesta del backend
+      function handleServerResponse(response) {
+        // Se espera que el backend envíe un JSON con 'success' y 'message'
+        if (response.success) {
+          showMessage(response.message, "green");
+        } else {
+          showMessage("Hubo un problema: " + response.message, "red");
+        }
+      }
+
+      // Función para mostrar mensajes en la interfaz
+      function showMessage(message, color) {
+        const messageElement = document.getElementById("message");
+        messageElement.innerHTML = `<p style="color: ${color};">${message}</p>`;
+      }
+
+      // Función para crear un indicador de carga
+      function createLoadingIndicator() {
+        const loadingIndicator = document.createElement("div");
+        loadingIndicator.classList.add("loading-spinner");
+        loadingIndicator.textContent = "Cargando... Por favor espere.";
+        return loadingIndicator;
+      }
+
+      // Función para actualizar el select de valores al cambiar la columna
+      function updateFilterValues() {
+        const field = document.getElementById("filterField").value;
+        const filterValueSelect = document.getElementById("filterValue");
+        filterValueSelect.innerHTML = ""; // Limpiar opciones previas
+
+        if (!field) {
+          filterValueSelect.disabled = true;
+          return;
+        }
+
+        filterValueSelect.disabled = false;
+
+        // Petición para obtener los valores únicos de la columna seleccionada
+        fetch(`/teachers/distinct?field=${field}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Error al obtener los valores");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            // Opción por defecto
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.text = "Seleccione un valor";
+            filterValueSelect.appendChild(defaultOption);
+
+            // Se recorren y agregan los valores obtenidos
+            data.forEach((value) => {
+              const option = document.createElement("option");
+              option.value = value;
+              option.text = value;
+              filterValueSelect.appendChild(option);
+            });
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Función para realizar el filtrado y mostrar resultados
+      function filterTeachers() {
+        const field = document.getElementById("filterField").value;
+        const value = document.getElementById("filterValue").value;
+
+        if (!field || !value) {
+          alert("Seleccione ambos campos para filtrar");
+          return;
+        }
+
+        fetch(
+          `/teachers/filter?field=${field}&value=${encodeURIComponent(value)}`
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Error en la petición");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            displayResults(data);
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Función para mostrar los resultados filtrados en la tabla
+      function displayResults(data) {
+        const tbody = document.querySelector("#docentes-table tbody");
+        tbody.innerHTML = ""; // Limpiar filas previas
+
+        if (data.length === 0) {
+          // Si no hay resultados, mostrar una fila con un mensaje.
+          // Se ajusta el colspan para incluir la columna de ranking.
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.colSpan = 6;
+          cell.style.textAlign = "center";
+          cell.textContent = "No se encontraron resultados.";
+          row.appendChild(cell);
+          tbody.appendChild(row);
+          return;
+        }
+
+        // Recorrer los docentes filtrados y agregarlos a la tabla
+        data.forEach((teacher) => {
+          const row = document.createElement("tr");
+
+          // Convertir el promedio a estrellas. Asegúrate de que 'teacher.promedio'
+          // venga definido en el objeto recibido desde el backend.
+          const starRating = getStarRating(teacher.promedio);
+
+          row.innerHTML = `
+            <td>${teacher.nombre_completo}</td>
+            <td>${teacher.correo_electronico}</td>
+            <td>${teacher.numero_celular}</td>
+            <td>${teacher.nivel_formacion}</td>
+            <td class="action-cell">
+                <button class="action-btn view-btn" onclick="viewDocente('${teacher.identificacion}')">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn add-note-btn" onclick="openNoteModal('${teacher.identificacion}')">
+                    <i class="fas fa-plus"></i> Agregar Nota
+                </button>
+                <button class="action-btn edit-note-btn" onclick="openUpdateNoteModal('${teacher.identificacion}')">
+                  <i class="fas fa-edit"></i> Editar Nota
+                </button>
+      
+                <button class="action-btn delete-btn" onclick="deleteDocente('${teacher.identificacion}')">
+                    <i class="fas fa-trash"></i> 
+                </button>
+                
+                
+            </td>
+            <td class="text-center">${starRating}</td>
+        `;
+          tbody.appendChild(row);
+        });
+      }
+
+      function buildNotasAccordion(notas) {
+        let accordionHTML = '<div class="accordion" id="notasAccordion">';
+        notas.forEach((nota, index) => {
+          const fecha = nota.created_at ? new Date(nota.created_at).toLocaleDateString() : "";
+          accordionHTML += `
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading${index}">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="false" aria-controls="collapse${index}">
+            Calificado por:ㅤ<strong>${nota.usuario_nombre || "Desconocido"}</strong>ㅤㅤ Nota:ㅤ<strong>${nota.nota}</strong> ${fecha ? `ㅤㅤ Fecha del registro  - ${fecha}` : ""}
+          </button>
+        </h2>
+        <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#notasAccordion">
+          <div class="accordion-body">
+            <p><strong>Comentario Interno:</strong> ${nota.str_Evi || "Sin comentario"}</p>
+            <p><strong>Comentario Externo:</strong> ${nota.str_ClienteExterno || "Sin comentario"}</p>
+          </div>
+        </div>
+      </div>
+    `;
+        });
+        accordionHTML += '</div>';
+        return accordionHTML;
+      }
+
+      function viewDocente(id) {
+        fetch(`/teachers/${id}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Error al obtener el detalle del docente");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Datos recibidos:", data);
+            if (!data.teacher) {
+              throw new Error("No se encontró información del docente");
+            }
+            const teacher = data.teacher;
+            const validateData = (value) => (value ?? "No aplica");
+
+            // Pestaña de Datos Básicos
+            const fecha = new Date(teacher.marca_temporal).toISOString().split("T")[0];
+            const basicHTML = `
+          <p><strong>Número de documento:</strong> ${validateData(teacher.identificacion)}</p>
+          <p><strong>Nombre Completo:</strong> ${validateData(teacher.nombre_completo)}</p>
+          <p><strong>Fecha de registro:</strong> ${validateData(fecha)}</p>
+          <p><strong>Promedio:</strong> ${validateData(teacher.promedio)}</p>
+      `;
+            document.getElementById("basic").innerHTML = basicHTML;
+
+            // Pestaña de Contacto
+            const contactHTML = `
+          <p><strong>Correo Electrónico:</strong> ${validateData(teacher.correo_electronico)}</p>
+          <p><strong>Número Celular:</strong> ${validateData(teacher.numero_celular)}</p>
+          <p><strong>Otro Número:</strong> ${validateData(teacher.otro_numero_contacto)}</p>
+          <p><strong>Envío WhatsApp:</strong> ${validateData(teacher.envio_whatsapp)}</p>
+          <p><strong>Lugar de Residencia:</strong> ${validateData(teacher.lugar_residencia)}</p>
+      `;
+            document.getElementById("contact").innerHTML = contactHTML;
+
+            // Pestaña de Formación
+            const educationHTML = `
+          <p><strong>Nivel de Formación:</strong> ${validateData(teacher.nivel_formacion)}</p>
+          <p><strong>Títulos Pregrado:</strong> ${validateData(teacher.titulos_pregrado)}</p>
+          <p><strong>Títulos Posgrado:</strong> ${validateData(teacher.titulos_posgrado)}</p>
+          <p><strong>Certificaciones:</strong> ${validateData(teacher.certificaciones)}</p>
+          <p><strong>Áreas de Especialización:</strong> ${validateData(teacher.areas_especializacion)}</p>
+          <p><strong>Resumen de Experiencia:</strong> ${validateData(teacher.resumen_experiencia)}</p>
+          <p><strong>Casos de Impacto:</strong> ${validateData(teacher.casos_impacto)}</p>
+      `;
+            document.getElementById("education").innerHTML = educationHTML;
+
+            // Pestaña de Disponibilidad
+            const availabilityHTML = `
+          <p><strong>Disponibilidad Lunes:</strong> ${validateData(teacher.disponibilidad_lunes)}</p>
+          <p><strong>Disponibilidad Martes:</strong> ${validateData(teacher.disponibilidad_martes)}</p>
+          <p><strong>Disponibilidad Miércoles:</strong> ${validateData(teacher.disponibilidad_miercoles)}</p>
+          <p><strong>Disponibilidad Jueves:</strong> ${validateData(teacher.disponibilidad_jueves)}</p>
+          <p><strong>Disponibilidad Sábado:</strong> ${validateData(teacher.disponibilidad_sabado)}</p>
+          <p><strong>Disponibilidad para Viajar:</strong> ${validateData(teacher.disponibilidad_viajar)}</p>
+          <p><strong>Equipo con Conexión Estable:</strong> ${validateData(teacher.equipo_conexion_estable)}</p>
+          <p><strong>Estilo Formador:</strong> ${validateData(teacher.estilo_formador)}</p>
+          <p><strong>Metodología:</strong> ${validateData(teacher.metodologia)}</p>
+          <p><strong>Restricción Contractual:</strong> ${validateData(teacher.restriccion_contractual)}</p>
+          <p><strong>Hoja de Vida:</strong> ${teacher.hoja_vida ? `<a href="${teacher.hoja_vida}" target="_blank">${teacher.hoja_vida}</a>` : "No aplica"}</p>
+          <p><strong>Video Enlace:</strong> ${teacher.video_enlace ? `<a href="${teacher.video_enlace}" target="_blank">${teacher.video_enlace}</a>` : "No aplica"}</p>
+      `;
+            document.getElementById("availability").innerHTML = availabilityHTML;
+
+            // Pestaña de Calificación: Construir el accordion con todas las calificaciones
+            let ratingHTML = "";
+            if (teacher.notas && teacher.notas.length > 0) {
+              ratingHTML = buildNotasAccordion(teacher.notas);
+            } else {
+              ratingHTML = "<p>No hay calificaciones registradas.</p>";
+            }
+            document.getElementById("rating").innerHTML = ratingHTML;
+
+            // Mostrar el modal utilizando Bootstrap
+            let teacherModal = new bootstrap.Modal(document.getElementById("teacherDetailModal"));
+            teacherModal.show();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: "Error al cargar el detalle del docente."
+            });
+          });
+      }
+      function autoResizeTextareas(modalElement) {
+        const textareas = modalElement.querySelectorAll("textarea");
+        textareas.forEach((textarea) => {
+          // Reinicia la altura para obtener el scrollHeight correcto
+          textarea.style.height = "auto";
+          const newHeight = Math.min(textarea.scrollHeight, 300); // 300px como altura máxima
+          textarea.style.height = newHeight + "px";
+          // Si el contenido excede el máximo, habilita el scroll vertical
+          textarea.style.overflowY = (textarea.scrollHeight > 300) ? "auto" : "hidden";
+        });
+      }
+
+
+
+      function openNoteModal(teacherIdentificacion) {
+        const modal = document.getElementById("noteModal");
+        console.log("Abriendo modal para:", teacherIdentificacion);
+        modal.classList.add("active");
+
+        // Recalcula la altura de los textarea una vez visible el modal
+        setTimeout(() => {
+          autoResizeTextareas(modal);
+        }, 50);
+
+        const form = document.getElementById("noteForm");
+        form.onsubmit = async function (event) {
+          event.preventDefault();
+          await submitNote(teacherIdentificacion);
+        };
+      }
+
+
+      function closeNoteModal() {
+        const modal = document.getElementById("noteModal");
+        console.log("Cerrando modal");
+        modal.classList.remove("active");
+      }
+
+
+      async function getCurrentUser() {
+        try {
+          const response = await fetch('/current_user');
+          const data = await response.json();
+          console.log("Current user ID:", data.user_id);
+          // Almacenar el ID del usuario en una variable global y en localStorage
+          window.currentUser = data.user_id;
+          localStorage.setItem("currentUser", data.user_id);
+        } catch (error) {
+          console.error("Error fetching current user:", error);
+        }
+      }
+      // Llamamos a la función para almacenar el usuario
+      getCurrentUser();
+
+      // Función para enviar la nota al backend
+      async function submitNote(teacherIdentificacion) {
+        // Obtener la nota seleccionada
+        const select = document.getElementById("noteSelect");
+        const nota = parseInt(select.value);
+        console.log("submitNote: teacherIdentificacion =", teacherIdentificacion, "nota =", nota);
+
+        // Obtener los comentarios adicionales
+        const comentarioInterno = document.getElementById("str_Evi").value;
+        const comentarioExterno = document.getElementById("str_ClienteExterno").value;
+        console.log("submitNote: Comentario Interno =", comentarioInterno, "Comentario Externo =", comentarioExterno);
+
+        // Obtener el ID del usuario desde una variable global o localStorage
+        const currentUser = window.currentUser || localStorage.getItem("currentUser");
+        if (!currentUser) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Usuario no encontrado',
+            text: "No se encontró el usuario actual. Por favor, inicia sesión nuevamente."
+          });
+          closeNoteModal();
+          return;
+        }
+        console.log("submitNote: currentUser =", currentUser);
+
+        try {
+          const response = await fetch(`/docentes/${teacherIdentificacion}/nota`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-User-Id": currentUser
+            },
+            body: JSON.stringify({
+              nota: nota,
+              str_Evi: comentarioInterno,
+              str_ClienteExterno: comentarioExterno
+            })
+          });
+          console.log("submitNote: Response status =", response.status);
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.log("submitNote: Error response data =", errorData);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: "Error al registrar la nota: " + (errorData.detail || "Error desconocido")
+            });
+            closeNoteModal();
+            return;
+          }
+
+          const data = await response.json();
+          console.log("submitNote: Success response data =", data);
+          Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: "Nota registrada con éxito. Promedio actual: " + data.promedio_actual
+          });
+          closeNoteModal();
+
+          // Actualizar la lista de docentes, si es necesario
+          if (typeof renderDocentes === "function" && typeof currentPage !== "undefined") {
+            console.log("submitNote: Actualizando lista de docentes para la página:", currentPage);
+            renderDocentes(currentPage);
+          }
+        } catch (error) {
+          console.error("submitNote: Error al registrar la nota:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: "Error al registrar la nota."
+          }).then(() => {
+            closeNoteModal();
+          });
+        }
+      }
+
+
+      // Cerrar el modal si se hace clic fuera de él
+      window.onclick = function (event) {
+        const modal = document.getElementById("noteModal");
+        if (event.target === modal) {
+          closeNoteModal();
+        }
+      };
+
+      // Función para abrir el modal de Actualización de Nota con los valores precargados
+      async function openUpdateNoteModal(teacherIdentificacion) {
+        console.log("Abriendo modal de editar para:", teacherIdentificacion);
+
+        try {
+          // Llamada al endpoint para obtener la calificación del docente para el usuario actual
+          const response = await fetch(`http://localhost:8000/docente/${teacherIdentificacion}/rating`);
+          if (!response.ok) {
+            throw new Error("Error al obtener la calificación");
+          }
+          const rating = await response.json();
+          console.log("Rating recibido:", rating);
+
+          // Si no hay nota registrada, muestra una alerta y no abre el modal
+          if (rating.nota === null || rating.nota === "" || rating.nota === undefined) {
+            Swal.fire({
+              icon: 'info',
+              title: 'Sin calificación',
+              text: 'Este docente no tiene una nota registrada para editar.'
+            });
+            return;
+          }
+
+          // Si existe calificación, procede a abrir el modal
+          const modal = document.getElementById("updateNoteModal");
+          modal.classList.add("active");
+
+          // Recalcula la altura de los textarea cuando el modal ya está visible
+          setTimeout(() => {
+            autoResizeTextareas(modal);
+          }, 50);
+
+          // Asignar valores a los inputs del modal utilizando los nombres exactos de la BD
+          document.getElementById("updateNoteSelect").value = rating.nota || '1';
+          document.getElementById("update_str_Evi").value = rating.str_Evi || "";
+          document.getElementById("update_str_ClienteExterno").value = rating.str_ClienteExterno || "";
+
+          // Asignar el evento submit al formulario de edición
+          const form = document.getElementById("updateNoteForm");
+          form.onsubmit = async function (event) {
+            event.preventDefault();
+            await submitEditNote(teacherIdentificacion);
+          };
+
+        } catch (error) {
+          console.error("Error al abrir el modal de edición:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: "No se pudo obtener la información de calificación."
+          });
+        }
+      }
+
+
+      // Función para cerrar el modal de Actualización de Nota
+      function closeUpdateNoteModal() {
+        const modal = document.getElementById("updateNoteModal");
+        modal.classList.remove("active");
+      }
+
+      async function submitEditNote(teacherIdentificacion) {
+        // Obtener la nueva nota y comentarios desde el formulario de edición
+        const select = document.getElementById("updateNoteSelect");
+        const nuevaNota = parseInt(select.value);
+        const comentarioInterno = document.getElementById("update_str_Evi").value;
+        const comentarioExterno = document.getElementById("update_str_ClienteExterno").value;
+
+        // Obtener el ID del usuario desde una variable global o localStorage
+        const currentUser = window.currentUser || localStorage.getItem("currentUser");
+        if (!currentUser) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Usuario no encontrado',
+            text: "No se encontró el usuario actual. Por favor, inicia sesión nuevamente."
+          }).then(() => {
+            closeUpdateNoteModal();
+          });
+          return;
+        }
+        console.log("submitEditNote: teacherIdentificacion =", teacherIdentificacion, "nuevaNota =", nuevaNota);
+        console.log("submitEditNote: currentUser =", currentUser);
+
+        try {
+          const response = await fetch(`/docentes/${teacherIdentificacion}/editar_nota`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "X-User-Id": currentUser
+            },
+            body: JSON.stringify({
+              nueva_nota: nuevaNota,
+              str_Evi: comentarioInterno,
+              str_ClienteExterno: comentarioExterno
+            })
+          });
+          console.log("submitEditNote: Response status =", response.status);
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.log("submitEditNote: Error response data =", errorData);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: "Error al editar la nota: " + (errorData.detail || "Error desconocido")
+            }).then(() => {
+              closeUpdateNoteModal();
+            });
+            return;
+          }
+
+          const data = await response.json();
+          console.log("submitEditNote: Success response data =", data);
+          Swal.fire({
+            icon: 'success',
+            title: 'Éxito',
+            text: "Nota editada con éxito. Promedio actual: " + data.promedio_actual
+          });
+          closeUpdateNoteModal();
+
+          // Actualizar la lista de docentes, si es necesario
+          if (typeof renderDocentes === "function" && typeof currentPage !== "undefined") {
+            console.log("submitEditNote: Actualizando lista de docentes para la página:", currentPage);
+            renderDocentes(currentPage);
+          }
+        } catch (error) {
+          console.error("submitEditNote: Error al editar la nota:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: "Error al editar la nota."
+          }).then(() => {
+            closeUpdateNoteModal();
+          });
+        }
+      }
+
+      async function deleteDocente(teacherIdentificacion) {
+        // Obtener el ID del usuario
+        const currentUser = window.currentUser || localStorage.getItem("currentUser");
+        if (!currentUser) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Usuario no encontrado',
+            text: "No se encontró el usuario actual. Por favor, inicia sesión nuevamente."
+          });
+          return;
+        }
+
+        // Confirmación antes de eliminar
+        const confirmResult = await Swal.fire({
+          icon: 'warning',
+          title: 'Confirmar eliminación',
+          text: '¿Estás seguro de eliminar la calificación para este docente?',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar'
+        });
+
+        if (!confirmResult.isConfirmed) {
+          return; // Si el usuario cancela, no hacemos nada
+        }
+
+        try {
+          const response = await fetch(`http://localhost:8000/docentes/${teacherIdentificacion}/eliminar_nota`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-User-Id': currentUser
+            }
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: errorData.detail || "Error desconocido al eliminar la calificación."
+            });
+            return;
+          }
+
+          const data = await response.json();
+          Swal.fire({
+            icon: 'success',
+            title: 'Eliminado',
+            text: data.mensaje + ". Nuevo promedio: " + data.promedio_actual
+          });
+
+          // Actualizar la lista de docentes, si la función renderDocentes y currentPage están definidas
+          if (typeof renderDocentes === "function" && typeof currentPage !== "undefined") {
+            renderDocentes(currentPage);
+          }
+        } catch (error) {
+          console.error("Error en deleteDocente:", error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: "Error al eliminar la calificación."
+          });
+        }
+      }
+
+      // Inicializar la tabla de docentes
+      renderDocentes(currentPage);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+
+</html>
