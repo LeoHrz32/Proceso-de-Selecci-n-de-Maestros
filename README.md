@@ -4,7 +4,7 @@ Necesitarás tener instalado ``` python 3.12.6``` y tener acceso a una terminal 
 >
 1. Necesitamos clonar el proyecto añadiendo la siguiente linea de comando en una terminal
 ```
-git clone https://github.com/LeoHrz32/Gestion-de-PDFS-Estudiantiles
+git clone https://github.com/LeoHrz32/Proceso-de-Seleccion-de-Maestros
 ```
 >
 2. Instalamos un entorno virtual (En caso de no tener uno).
